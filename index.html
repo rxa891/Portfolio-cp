@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minkyo Kim — Portfolio</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <div class="cursor-dot" id="cursorDot" aria-hidden="true"></div>
+
+  <!-- Navigation -->
+  <nav class="nav" id="nav">
+    <a href="#hero" class="nav-logo">MK</a>
+    <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#about">About</a></li>
+      <li><a href="#activities">Activities</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero" id="hero">
+    <div class="hero-overlay"></div>
+    <div class="hero-bg-placeholder" aria-hidden="true"></div>
+    <div class="hero-content">
+      <div class="hero-text">
+        <h1 class="hero-name">Minkyo Kim</h1>
+        <p class="hero-address">83-21 Wangsimni-ro, Seongdong-gu<br>Seoul, Republic of Korea</p>
+      </div>
+      <div class="hero-profile">
+        <div class="img-placeholder profile-img" aria-label="Profile photo placeholder"></div>
+      </div>
+    </div>
+    <a href="#about" class="scroll-hint" aria-label="Scroll down">
+      <span class="scroll-arrow"></span>
+    </a>
+  </section>
+
+  <!-- About Me -->
+  <section class="section about" id="about">
+    <div class="container">
+      <h2 class="section-title">About Me</h2>
+      <div class="keywords">
+        <span class="keyword">Environmentalism</span>
+        <span class="keyword">Photojournalism</span>
+        <span class="keyword">Rowing</span>
+        <span class="keyword">Art</span>
+        <span class="keyword">Leadership</span>
+      </div>
+      <p class="about-text">
+        I connect art, journalism, and athletics to advocate for democracy and the environment.
+        As founding crew captain and environmental lead, I turn passion into action — on the water and in the community.
+      </p>
+      <div class="video-wrapper">
+        <iframe
+          src="https://www.youtube.com/embed/EdFrM-SigOs"
+          title="Personal Introduction Video"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen
+          loading="lazy"
+        ></iframe>
+      </div>
+    </div>
+  </section>
+
+  <!-- Activities -->
+  <section class="section activities" id="activities">
+    <div class="container">
+      <h2 class="section-title">Activities</h2>
+
+      <!-- K-Environmentalism -->
+      <article class="activity-block env-block" id="env">
+        <h3 class="activity-title">K-Environmentalism</h3>
+        <div class="env-collage">
+          <figure class="env-fig env-fig--portrait">
+            <div class="img-placeholder env-img env-img--portrait" aria-label="Getbol image placeholder"></div>
+          </figure>
+
+          <p class="env-tag env-tag--1">Getbol — Korea's mudflat as a model for carbon neutrality</p>
+
+          <figure class="env-fig env-fig--square">
+            <div class="img-placeholder env-img env-img--square" aria-label="Byeotjip image placeholder"></div>
+          </figure>
+
+          <p class="env-tag env-tag--2">Byeotjip — straw stacks and sustainable regeneration</p>
+
+          <figure class="env-fig env-fig--landscape">
+            <div class="img-placeholder env-img env-img--landscape" aria-label="Pet-Net image placeholder"></div>
+          </figure>
+
+          <p class="env-tag env-tag--3">Pet-Net — collecting trash on the water while rowing</p>
+
+          <p class="env-statement">K-Environmentalism Magazine — preserving culture for the future</p>
+
+          <figure class="env-fig env-fig--square-sm">
+            <div class="img-placeholder env-img env-img--square-sm" aria-label="Row for Pure campaign placeholder"></div>
+          </figure>
+
+          <p class="env-tag env-tag--4">Row for Pure, Cut through Sweat — environmental campaign on the water</p>
+        </div>
+      </article>
+
+      <!-- Photojournalism -->
+      <article class="activity-block photo-block" id="photo">
+        <h3 class="activity-title">Photojournalism</h3>
+        <p class="activity-sub">Scroll to spin the gallery · Click an image for details</p>
+        <div class="cylinder-scene" id="cylinderScene">
+          <div class="cylinder" id="cylinder">
+            <div class="cylinder-card" data-index="0">
+              <div class="img-placeholder cylinder-img" aria-label="Impeachment protest photo placeholder"></div>
+              <div class="card-info">
+                <h4>Light Against Darkness</h4>
+                <p>Democracy's ongoing struggle in South Korea — from dictatorship to the 2024 impeachment assembly.</p>
+              </div>
+            </div>
+            <div class="cylinder-card" data-index="1">
+              <div class="img-placeholder cylinder-img" aria-label="Image Atlas placeholder"></div>
+              <div class="card-info">
+                <h4>Image Atlas</h4>
+                <p>Order Amidst Chaos — linking protest photography with art history to explore preservation.</p>
+              </div>
+            </div>
+            <div class="cylinder-card" data-index="2">
+              <div class="img-placeholder cylinder-img" aria-label="Scenic project placeholder"></div>
+              <div class="card-info">
+                <h4>Scenic</h4>
+                <p>Environmental journal highlighting harmony between nature and urban life.</p>
+              </div>
+            </div>
+            <div class="cylinder-card" data-index="3">
+              <div class="img-placeholder cylinder-img" aria-label="Light drawing placeholder"></div>
+              <div class="card-info">
+                <h4>Light Drawing</h4>
+                <p>Plum blossoms on water — resilience and renewal through performing art.</p>
+              </div>
+            </div>
+            <div class="cylinder-card" data-index="4">
+              <div class="img-placeholder cylinder-img" aria-label="Concert for Peace placeholder"></div>
+              <div class="card-info">
+                <h4>Concert for Peace</h4>
+                <p>Musical protest for peace — non-violent demonstration through art and advocacy.</p>
+              </div>
+            </div>
+            <div class="cylinder-card" data-index="5">
+              <div class="img-placeholder cylinder-img" aria-label="Democracy history placeholder"></div>
+              <div class="card-info">
+                <h4>History Repeats</h4>
+                <p>Lightsticks of hope against anachronistic darkness — reflecting Korea's democratic journey.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal" id="photoModal" aria-hidden="true">
+          <div class="modal-backdrop" id="modalBackdrop"></div>
+          <div class="modal-content">
+            <button class="modal-close" id="modalClose" aria-label="Close">&times;</button>
+            <div class="modal-img img-placeholder" id="modalImg"></div>
+            <h4 id="modalTitle"></h4>
+            <p id="modalText"></p>
+          </div>
+        </div>
+      </article>
+
+      <!-- Rowing -->
+      <article class="activity-block row-block" id="rowing">
+        <h3 class="activity-title">Rowing</h3>
+        <div class="rowing-scene" id="rowingScene">
+          <svg class="water-line" viewBox="0 0 1200 80" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M0,40 Q300,20 600,40 T1200,40" fill="none" stroke="currentColor" stroke-width="2" opacity="0.3"/>
+          </svg>
+          <div class="shell-track">
+            <div class="rowing-shell" id="rowingShell" aria-hidden="true">
+              <svg viewBox="0 0 120 24" class="shell-svg">
+                <ellipse cx="60" cy="12" rx="55" ry="6" fill="#0080FE" opacity="0.9"/>
+                <line x1="20" y1="8" x2="20" y2="16" stroke="#FFFEFA" stroke-width="1.5"/>
+                <line x1="40" y1="8" x2="40" y2="16" stroke="#FFFEFA" stroke-width="1.5"/>
+                <line x1="60" y1="8" x2="60" y2="16" stroke="#FFFEFA" stroke-width="1.5"/>
+                <line x1="80" y1="8" x2="80" y2="16" stroke="#FFFEFA" stroke-width="1.5"/>
+              </svg>
+            </div>
+            <div class="rowing-info" data-step="0">
+              <span class="info-dot"></span>
+              <div class="info-card">
+                <h4>Varsity Crew Captain</h4>
+                <p>Founding member of Korea's first international school crew team.</p>
+              </div>
+            </div>
+            <div class="rowing-info" data-step="1">
+              <span class="info-dot"></span>
+              <div class="info-card">
+                <h4>Independence Day Regatta 2023</h4>
+                <p>First Asian amateur crew varsity at Philadelphia — diversity on the global stage.</p>
+              </div>
+            </div>
+            <div class="rowing-info" data-step="2">
+              <span class="info-dot"></span>
+              <div class="info-card">
+                <h4>World Rowing Indoor Championships</h4>
+                <p>2024 Team Relay Men — 4th place worldwide, personal best record.</p>
+              </div>
+            </div>
+            <div class="rowing-info" data-step="3">
+              <span class="info-dot"></span>
+              <div class="info-card">
+                <h4>Misari & Chungju Regattas</h4>
+                <p>Single & quadruple sculling 2nd place — national-level competition in Korea.</p>
+              </div>
+            </div>
+            <div class="rowing-info" data-step="4">
+              <span class="info-dot"></span>
+              <div class="info-card">
+                <h4>Row for Pure</h4>
+                <p>Connecting clean water advocacy with athletic dedication on the Passaic River.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- Contact -->
+  <section class="section contact" id="contact">
+    <div class="container">
+      <h2 class="section-title">Contact</h2>
+      <div class="contact-grid">
+        <div class="contact-info">
+          <a href="mailto:michael.kim@pcakorea.org" class="contact-link">michael.kim@pcakorea.org</a>
+          <a href="mailto:minkyokim@caelumprep.com" class="contact-link">minkyokim@caelumprep.com</a>
+          <p class="contact-phone">(+82) 10-5441-4589</p>
+          <p class="contact-school">Providence Christian Academy Korea</p>
+        </div>
+        <a href="resume.pdf" class="resume-btn" download>
+          <span class="resume-icon">↓</span>
+          Download Resume
+        </a>
+      </div>
+      <div class="contact-links">
+        <a href="https://www.caelumplena.com/minkyokim" target="_blank" rel="noopener">Personal Website</a>
+        <a href="https://youtu.be/ZyquDOyuKos" target="_blank" rel="noopener">Athletic Introduction</a>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <p>&copy; 2025 Minkyo Kim</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
