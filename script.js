@@ -7,11 +7,14 @@
   let mouseY = -100;
   let dotX = -100;
   let dotY = -100;
+  let cursorSuppressed = false;
 
   document.addEventListener('mousemove', e => {
     mouseX = e.clientX;
     mouseY = e.clientY;
-    cursorDot.classList.remove('hidden');
+    if (!cursorSuppressed) {
+      cursorDot.classList.remove('hidden');
+    }
   });
 
   document.addEventListener('mouseleave', () => cursorDot.classList.add('hidden'));
@@ -26,7 +29,7 @@
   animateCursor();
 
   document.querySelectorAll(
-    'a, button, .cylinder-card, .keyword, .resume-btn, .nav-toggle, .scroll-hint, .modal-close, .modal-content'
+    'a, button, .cylinder-card, .keyword, .resume-btn, .nav-toggle, .scroll-hint, .modal-close, .modal-content, .rowing-shell'
   ).forEach(el => {
     el.addEventListener('mouseenter', () => cursorDot.classList.add('hover'));
     el.addEventListener('mouseleave', () => cursorDot.classList.remove('hover'));
@@ -40,9 +43,9 @@
     target: 0,
     velocity: 0,
     paused: false,
-    wheelMultiplier: 0.24,
+    wheelMultiplier: 0.25,
     friction: 0.78,
-    ease: 0.0456,
+    ease: 0.0475,
     minVelocity: 0.12,
     maxScroll: 0,
 
@@ -284,8 +287,6 @@
   });
 
   /* ---- Rowing Shell Animation ---- */
-  const rowingScrollTrack = document.getElementById('rowingScrollTrack');
-  const rowingSticky = document.querySelector('.rowing-sticky');
   const rowingScene = document.getElementById('rowingScene');
   const rowingShell = document.getElementById('rowingShell');
   const shellTrack = document.getElementById('shellTrack');
@@ -293,57 +294,10 @@
   const rowingInfos = rowingScene.querySelectorAll('.rowing-info');
   const WATER_VIEWBOX = { width: 1200, height: 80 };
   const CARD_GAP_SCALE = 0.9215;
-  const ROWING_LENGTH_SCALE = 1.5;
-
-  function getRowingLinearProgress() {
-    const rect = rowingScrollTrack.getBoundingClientRect();
-    const trackHeight = rowingScrollTrack.offsetHeight;
-    const vh = window.innerHeight;
-    return Math.max(0, Math.min(1, (vh - rect.top) / (trackHeight + vh)));
-  }
-
-  /* Piecewise vertical path: decelerate → constant → accelerate */
-  function getContentViewportY(t) {
-    const yStart = 0.92;
-    const yBottomThird = 2 / 3;
-    const yTwoThirds = 1 / 3;
-    const yEnd = -0.08;
-
-    if (t <= 0.33) {
-      const p = t / 0.33;
-      const eased = 1 - Math.pow(1 - p, 2.5);
-      return yStart + (yBottomThird - yStart) * eased;
-    }
-    if (t <= 0.66) {
-      const p = (t - 0.33) / 0.33;
-      return yBottomThird + (yTwoThirds - yBottomThird) * p;
-    }
-    const p = (t - 0.66) / 0.34;
-    const eased = p * p;
-    return yTwoThirds + (yEnd - yTwoThirds) * eased;
-  }
-
-  function updateContentPosition(linearT) {
-    if (!rowingSticky || !rowingScrollTrack) return;
-
-    const vh = window.innerHeight;
-    const targetCenterY = getContentViewportY(linearT) * vh;
-    const trackRect = rowingScrollTrack.getBoundingClientRect();
-    const naturalCenterY = trackRect.top + rowingSticky.offsetHeight / 2;
-
-    rowingSticky.style.transform = `translateY(${targetCenterY - naturalCenterY}px)`;
-  }
-
-  function getRowingScrollLength() {
-    const base = window.innerWidth <= 768 ? 667 : 556;
-    return base * ROWING_LENGTH_SCALE;
-  }
-
-  function layoutRowingTrack() {
-    if (!rowingScrollTrack) return;
-    const vh = window.innerHeight;
-    rowingScrollTrack.style.height = `${vh + getRowingScrollLength()}px`;
-  }
+  const SHELL_OVERSHOOT = 28;
+  const CARD_REVEAL_LEAD = 0.4;
+  let shellProgress = 0;
+  let isDraggingShell = false;
 
   function getShellMetrics() {
     const isMobile = window.innerWidth <= 768;
@@ -445,50 +399,140 @@
     });
   }
 
-  function updateRowing() {
-    if (!shellTrack || !rowingScrollTrack) return;
-
-    const rect = rowingScrollTrack.getBoundingClientRect();
-    const vh = window.innerHeight;
-    if (rect.bottom <= 0 || rect.top >= vh) return;
-
-    const linearProgress = getRowingLinearProgress();
-    updateContentPosition(linearProgress);
-
-    const { isMobile } = getShellMetrics();
-
+  function getShellTravelBounds() {
+    const { isMobile, centerX } = getShellMetrics();
     if (isMobile) {
-      positionShellOnPathByProgress(linearProgress);
-    } else {
-      const trackW = shellTrack.offsetWidth;
-      const cardW = Math.min(180, Math.max(150, trackW * 0.16));
-      const { centerX } = getShellMetrics();
-      const edgePad = cardW / 2 + 32;
-      const span = Math.max(0, trackW - edgePad * 2);
-      const step = rowingInfos.length > 1 ? (span / (rowingInfos.length - 1)) * CARD_GAP_SCALE : 0;
-      const start = edgePad + (span - step * (rowingInfos.length - 1)) / 2;
-      const maxTravel = step * (rowingInfos.length - 1);
-      positionShellOnPath(start - centerX + linearProgress * maxTravel);
+      return { isMobile: true, maxTravel: 1.15 };
     }
 
-    const stepCount = rowingInfos.length;
-    rowingInfos.forEach((info, i) => {
-      const stepStart = i / stepCount;
-      info.classList.toggle('visible', linearProgress >= stepStart - 0.05);
+    const trackW = shellTrack.offsetWidth;
+    const cardW = Math.min(180, Math.max(150, trackW * 0.16));
+    const edgePad = cardW / 2 + 32;
+    const span = Math.max(0, trackW - edgePad * 2);
+    const step = rowingInfos.length > 1 ? (span / (rowingInfos.length - 1)) * CARD_GAP_SCALE : 0;
+    const start = edgePad + (span - step * (rowingInfos.length - 1)) / 2;
+    const cardSpanTravel = step * (rowingInfos.length - 1);
+    const overshoot = cardW * 0.5 + SHELL_OVERSHOOT;
+    const maxTravel = cardSpanTravel + overshoot + 30;
+
+    return { isMobile: false, start: start - centerX, maxTravel };
+  }
+
+  function getCardStepPx() {
+    const { isMobile } = getShellMetrics();
+    const count = rowingInfos.length;
+
+    if (isMobile) {
+      const trackH = rowingScene.offsetHeight;
+      const range = trackH * (76 - 12) / 100;
+      return count > 1 ? (range / (count - 1)) * CARD_GAP_SCALE : 0;
+    }
+
+    const trackW = shellTrack.offsetWidth;
+    const cardW = Math.min(180, Math.max(150, trackW * 0.16));
+    const edgePad = cardW / 2 + 32;
+    const span = Math.max(0, trackW - edgePad * 2);
+    return count > 1 ? (span / (count - 1)) * CARD_GAP_SCALE : 0;
+  }
+
+  function updateInfoCardsFromProgress() {
+    const shellRect = rowingShell.getBoundingClientRect();
+    const shellCenterX = shellRect.left + shellRect.width / 2;
+    const shellCenterY = shellRect.top + shellRect.height / 2;
+    const { isMobile } = getShellMetrics();
+    const revealLead = getCardStepPx() * CARD_REVEAL_LEAD;
+
+    rowingInfos.forEach((info) => {
+      const cardRect = info.getBoundingClientRect();
+      const cardCenterX = cardRect.left + cardRect.width / 2;
+      const cardCenterY = cardRect.top + cardRect.height / 2;
+      const passed = isMobile
+        ? cardCenterY <= shellCenterY + revealLead
+        : cardCenterX <= shellCenterX + revealLead;
+
+      info.classList.toggle('visible', passed);
     });
   }
 
-  function onRowingLayoutChange() {
-    layoutRowingTrack();
-    layoutRowingInfos();
-    updateRowing();
+  function setShellProgress(progress) {
+    if (!shellTrack) return;
+
+    shellProgress = Math.max(0, Math.min(1, progress));
+    const { isMobile } = getShellMetrics();
+
+    if (isMobile) {
+      positionShellOnPathByProgress(Math.min(1, shellProgress * 1.15));
+    } else {
+      const { start, maxTravel } = getShellTravelBounds();
+      positionShellOnPath(start + shellProgress * maxTravel);
+    }
+
+    updateInfoCardsFromProgress();
+    rowingShell.setAttribute('aria-valuenow', String(Math.round(shellProgress * 100)));
   }
 
-  layoutRowingTrack();
+  function progressFromPointer(clientX, clientY) {
+    const { isMobile, centerX } = getShellMetrics();
+
+    if (isMobile) {
+      const sceneRect = rowingScene.getBoundingClientRect();
+      return (clientY - sceneRect.top) / sceneRect.height;
+    }
+
+    const trackRect = shellTrack.getBoundingClientRect();
+    const { start, maxTravel } = getShellTravelBounds();
+    const shellLeft = clientX - trackRect.left - centerX;
+    return maxTravel > 0 ? (shellLeft - start) / maxTravel : 0;
+  }
+
+  function onShellPointerDown(e) {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+
+    isDraggingShell = true;
+    cursorSuppressed = true;
+    cursorDot.classList.add('hidden');
+    cursorDot.classList.remove('hover');
+    rowingShell.classList.add('dragging');
+    rowingShell.setPointerCapture(e.pointerId);
+    smoothScroll.pause();
+    setShellProgress(progressFromPointer(e.clientX, e.clientY));
+    e.preventDefault();
+  }
+
+  function onShellPointerMove(e) {
+    if (!isDraggingShell) return;
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+    setShellProgress(progressFromPointer(e.clientX, e.clientY));
+    e.preventDefault();
+  }
+
+  function endShellDrag(e) {
+    if (!isDraggingShell) return;
+
+    isDraggingShell = false;
+    cursorSuppressed = false;
+    cursorDot.classList.remove('hidden');
+    rowingShell.classList.remove('dragging');
+    if (rowingShell.hasPointerCapture(e.pointerId)) {
+      rowingShell.releasePointerCapture(e.pointerId);
+    }
+    smoothScroll.resume();
+  }
+
+  function onRowingLayoutChange() {
+    layoutRowingInfos();
+    setShellProgress(shellProgress);
+  }
+
   layoutRowingInfos();
-  window.addEventListener('scroll', updateRowing, { passive: true });
+  setShellProgress(0);
+
+  rowingShell.addEventListener('pointerdown', onShellPointerDown);
+  rowingShell.addEventListener('pointermove', onShellPointerMove);
+  rowingShell.addEventListener('pointerup', endShellDrag);
+  rowingShell.addEventListener('pointercancel', endShellDrag);
   window.addEventListener('resize', onRowingLayoutChange);
-  updateRowing();
 
   /* ---- Keyword hover ripple ---- */
   document.querySelectorAll('.keyword').forEach(kw => {

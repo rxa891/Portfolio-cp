@@ -162,15 +162,13 @@
       <!-- Rowing -->
       <article class="activity-block row-block" id="rowing">
         <h3 class="activity-title">Rowing</h3>
-        <div class="rowing-scroll-track" id="rowingScrollTrack">
-          <div class="rowing-sticky">
-            <div class="rowing-scene" id="rowingScene">
+        <div class="rowing-scene" id="rowingScene">
           <div class="rowing-path" id="rowingPath">
             <svg class="water-line" viewBox="0 0 1200 80" preserveAspectRatio="none" aria-hidden="true">
               <path id="waterPath" d="M0,40 Q300,20 600,40 T1200,40" fill="none" stroke="currentColor" stroke-width="2" opacity="0.3"/>
             </svg>
             <div class="shell-track" id="shellTrack">
-              <div class="rowing-shell" id="rowingShell" aria-hidden="true">
+              <div class="rowing-shell" id="rowingShell" role="slider" aria-label="Drag to explore rowing achievements" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0">
                 <svg viewBox="0 0 120 24" class="shell-svg">
                   <ellipse cx="60" cy="12" rx="55" ry="6" fill="#0080FE" opacity="0.9"/>
                   <line x1="20" y1="8" x2="20" y2="16" stroke="#FFFEFA" stroke-width="1.5"/>
@@ -214,8 +212,6 @@
                   <p>Connecting clean water advocacy with athletic dedication on the Passaic River.</p>
                 </div>
               </div>
-            </div>
-          </div>
             </div>
           </div>
         </div>
