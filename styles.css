@@ -40,6 +40,15 @@ body {
   cursor: none;
 }
 
+body.modal-open {
+  overflow: hidden;
+}
+
+body.modal-open .modal,
+body.modal-open .modal * {
+  cursor: none;
+}
+
 a, button, .cylinder-card, .keyword, .resume-btn, .nav-toggle, .scroll-hint {
   cursor: none;
 }
@@ -53,7 +62,7 @@ a, button, .cylinder-card, .keyword, .resume-btn, .nav-toggle, .scroll-hint {
   background: var(--azure);
   border-radius: 50%;
   pointer-events: none;
-  z-index: 10000;
+  z-index: 10002;
   transform: translate(-50%, -50%);
   transition: width 0.2s ease, height 0.2s ease, opacity 0.2s ease;
   will-change: transform;
@@ -391,7 +400,7 @@ a, button, .cylinder-card, .keyword, .resume-btn, .nav-toggle, .scroll-hint {
 
 .env-collage {
   position: relative;
-  min-height: 1280px;
+  min-height: 1080px;
   margin-top: var(--spacing-md);
 }
 
@@ -427,14 +436,14 @@ a, button, .cylinder-card, .keyword, .resume-btn, .nav-toggle, .scroll-hint {
 }
 
 .env-fig--portrait {
-  top: 0;
+  top: 200px;
   left: 0;
   z-index: 1;
 }
 
 .env-fig--square {
-  top: 220px;
-  left: 34%;
+  top: 410px;
+  left: calc(34% + 30px);
   z-index: 2;
 }
 
@@ -445,7 +454,7 @@ a, button, .cylinder-card, .keyword, .resume-btn, .nav-toggle, .scroll-hint {
 }
 
 .env-fig--square-sm {
-  top: 700px;
+  top: 780px;
   left: 6%;
   z-index: 2;
 }
@@ -479,16 +488,16 @@ a, button, .cylinder-card, .keyword, .resume-btn, .nav-toggle, .scroll-hint {
 }
 
 .env-tag--4 {
-  top: 880px;
-  left: 26%;
+  top: 900px;
+  left: 282px;
   max-width: 220px;
 }
 
 .env-statement {
   position: absolute;
-  top: 460px;
+  top: 740px;
   right: 0;
-  left: 38%;
+  left: calc(38% + 150px);
   z-index: 5;
   font-size: clamp(1.35rem, 2.8vw, 2rem);
   font-weight: 400;
@@ -503,40 +512,54 @@ a, button, .cylinder-card, .keyword, .resume-btn, .nav-toggle, .scroll-hint {
 }
 
 /* Photojournalism Cylinder */
+.photo-scroll-track {
+  position: relative;
+  margin: 0 -1rem;
+  /* height set in JS: exactly one viewport of scroll for a full 360° rotation */
+}
+
+.photo-sticky {
+  position: sticky;
+  top: 72px;
+  height: calc(100vh - 72px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
 .cylinder-scene {
-  perspective: 1200px;
-  height: 420px;
+  perspective: 1368px;
+  height: 479px;
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
   position: relative;
-  margin: 0 -1rem;
 }
 
 .cylinder {
   position: relative;
-  width: 200px;
-  height: 280px;
+  width: 228px;
+  height: 319px;
   transform-style: preserve-3d;
-  transition: transform 0.1s linear;
 }
 
 .cylinder-card {
   position: absolute;
-  width: 180px;
-  height: 240px;
+  width: 205px;
+  height: 274px;
   left: 50%;
   top: 50%;
-  margin-left: -90px;
-  margin-top: -120px;
+  margin-left: -103px;
+  margin-top: -137px;
   transform-style: preserve-3d;
-  cursor: pointer;
-  transition: filter var(--transition);
+  pointer-events: none;
 }
 
-.cylinder-card:hover {
-  filter: brightness(1.05);
+.cylinder-card--front {
+  pointer-events: auto;
 }
 
 .cylinder-card .cylinder-img {
@@ -545,6 +568,13 @@ a, button, .cylinder-card, .keyword, .resume-btn, .nav-toggle, .scroll-hint {
   border-radius: var(--radius);
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
   backface-visibility: hidden;
+  transition: transform var(--transition), box-shadow var(--transition);
+  transform-origin: center center;
+}
+
+.cylinder-card--front:hover .cylinder-img {
+  transform: scale(1.06);
+  box-shadow: 0 12px 36px rgba(0, 128, 254, 0.2);
 }
 
 .cylinder-card .card-info {
@@ -555,38 +585,45 @@ a, button, .cylinder-card, .keyword, .resume-btn, .nav-toggle, .scroll-hint {
 .modal {
   position: fixed;
   inset: 0;
-  z-index: 2000;
+  width: 100%;
+  height: 100%;
+  height: 100dvh;
+  z-index: 10001;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: var(--spacing-sm);
   opacity: 0;
   visibility: hidden;
+  pointer-events: none;
   transition: opacity var(--transition), visibility var(--transition);
 }
 
 .modal.active {
   opacity: 1;
   visibility: visible;
+  pointer-events: auto;
 }
 
 .modal-backdrop {
-  position: absolute;
+  position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
+  background: rgba(0, 0, 0, 0.55);
 }
 
 .modal-content {
   position: relative;
+  z-index: 1;
   background: var(--cream);
   border-radius: var(--radius);
   padding: var(--spacing-md);
   max-width: 480px;
   width: 90%;
-  max-height: 85vh;
+  max-height: min(85vh, 85dvh);
   overflow-y: auto;
   transform: translateY(20px);
   transition: transform var(--transition);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.18);
 }
 
 .modal.active .modal-content {
@@ -630,37 +667,58 @@ a, button, .cylinder-card, .keyword, .resume-btn, .nav-toggle, .scroll-hint {
 }
 
 /* Rowing Animation */
+.rowing-scroll-track {
+  position: relative;
+  margin-top: 180px;
+}
+
+.rowing-sticky {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  will-change: transform;
+  z-index: 2;
+}
+
 .rowing-scene {
   position: relative;
-  min-height: 500px;
+  width: 100%;
   padding: var(--spacing-md) 0;
   overflow: hidden;
 }
 
+.rowing-path {
+  position: relative;
+  width: 100%;
+  height: 100px;
+  margin: var(--spacing-md) 0 var(--spacing-lg);
+}
+
 .water-line {
   position: absolute;
-  bottom: 35%;
-  left: 0;
+  inset: 0;
   width: 100%;
-  height: 80px;
+  height: 100%;
   color: var(--azure);
   pointer-events: none;
 }
 
 .shell-track {
-  position: relative;
-  height: 400px;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
 }
 
 .rowing-shell {
   position: absolute;
-  top: 50%;
   left: 0;
+  top: 0;
   width: 120px;
   height: 24px;
-  transform: translateY(-50%);
   z-index: 10;
-  transition: left 0.05s linear;
   filter: drop-shadow(0 4px 12px rgba(0, 128, 254, 0.3));
 }
 
@@ -673,21 +731,15 @@ a, button, .cylinder-card, .keyword, .resume-btn, .nav-toggle, .scroll-hint {
   position: absolute;
   top: 50%;
   opacity: 0;
-  transform: translateY(-50%) scale(0.9);
+  transform: translate(-50%, -50%) scale(0.9);
   transition: opacity 0.5s ease, transform 0.5s ease;
   z-index: 5;
 }
 
 .rowing-info.visible {
   opacity: 1;
-  transform: translateY(-50%) scale(1);
+  transform: translate(-50%, -50%) scale(1);
 }
-
-.rowing-info[data-step="0"] { left: 8%; }
-.rowing-info[data-step="1"] { left: 28%; }
-.rowing-info[data-step="2"] { left: 48%; }
-.rowing-info[data-step="3"] { left: 68%; }
-.rowing-info[data-step="4"] { left: 85%; }
 
 .info-dot {
   display: block;
@@ -704,7 +756,8 @@ a, button, .cylinder-card, .keyword, .resume-btn, .nav-toggle, .scroll-hint {
   border: 1px solid rgba(0, 128, 254, 0.15);
   border-radius: var(--radius);
   padding: 1rem 1.25rem;
-  max-width: 200px;
+  width: var(--info-card-width, 180px);
+  max-width: var(--info-card-width, 180px);
   box-shadow: 0 4px 20px rgba(0, 128, 254, 0.08);
 }
 
@@ -874,22 +927,22 @@ a, button, .cylinder-card, .keyword, .resume-btn, .nav-toggle, .scroll-hint {
   }
 
   .env-collage {
-    min-height: 1050px;
+    min-height: 850px;
   }
 
   .env-fig--square {
-    top: 200px;
-    left: 28%;
+    top: 390px;
+    left: calc(28% + 30px);
   }
 
   .env-fig--square-sm {
-    top: 620px;
+    top: 700px;
     left: 4%;
   }
 
   .env-statement {
-    top: 400px;
-    left: 32%;
+    top: 680px;
+    left: calc(32% + 150px);
     font-size: 1.25rem;
   }
 
@@ -898,27 +951,33 @@ a, button, .cylinder-card, .keyword, .resume-btn, .nav-toggle, .scroll-hint {
   }
 
   .env-tag--4 {
-    top: 780px;
-    left: 18%;
+    top: 800px;
+    left: calc(18% + 42px);
+  }
+
+  .photo-sticky {
+    top: 64px;
+    height: calc(100vh - 64px);
   }
 
   .cylinder-scene {
-    height: 360px;
+    height: 410px;
   }
 
   .cylinder-card {
-    width: 150px;
-    height: 200px;
-    margin-left: -75px;
-    margin-top: -100px;
+    width: 171px;
+    height: 228px;
+    margin-left: -86px;
+    margin-top: -114px;
+  }
+
+  .rowing-path {
+    height: 80px;
+    margin-bottom: var(--spacing-md);
   }
 
   .rowing-scene {
-    min-height: 600px;
-  }
-
-  .shell-track {
-    height: 550px;
+    min-height: auto;
   }
 
   .rowing-shell {
@@ -927,19 +986,12 @@ a, button, .cylinder-card, .keyword, .resume-btn, .nav-toggle, .scroll-hint {
   }
 
   .rowing-info {
-    top: auto;
-    transform: none;
+    transform: translate(0, 0) scale(0.9);
   }
 
   .rowing-info.visible {
-    transform: none;
+    transform: translate(0, 0) scale(1);
   }
-
-  .rowing-info[data-step="0"] { top: 12%; left: 5%; }
-  .rowing-info[data-step="1"] { top: 28%; left: 5%; }
-  .rowing-info[data-step="2"] { top: 44%; left: 5%; }
-  .rowing-info[data-step="3"] { top: 60%; left: 5%; }
-  .rowing-info[data-step="4"] { top: 76%; left: 5%; }
 
   .info-card {
     max-width: 100%;
@@ -965,7 +1017,7 @@ a, button, .cylinder-card, .keyword, .resume-btn, .nav-toggle, .scroll-hint {
   }
 
   .env-collage {
-    min-height: 920px;
+    min-height: 720px;
   }
 
   .env-fig--landscape {
@@ -974,18 +1026,18 @@ a, button, .cylinder-card, .keyword, .resume-btn, .nav-toggle, .scroll-hint {
   }
 
   .env-fig--square {
-    top: 180px;
-    left: 22%;
+    top: 370px;
+    left: calc(22% + 30px);
   }
 
   .env-statement {
-    top: 340px;
-    left: 24%;
+    top: 620px;
+    left: calc(24% + 150px);
     font-size: 1.1rem;
   }
 
   .env-fig--square-sm {
-    top: 540px;
+    top: 620px;
   }
 
   .env-tag--3 {
@@ -994,8 +1046,8 @@ a, button, .cylinder-card, .keyword, .resume-btn, .nav-toggle, .scroll-hint {
   }
 
   .env-tag--4 {
-    top: 680px;
-    left: 10%;
+    top: 700px;
+    left: calc(10% + 42px);
   }
 }
 

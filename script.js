@@ -26,7 +26,7 @@
   animateCursor();
 
   document.querySelectorAll(
-    'a, button, .cylinder-card, .keyword, .resume-btn, .nav-toggle, .scroll-hint, .modal-close'
+    'a, button, .cylinder-card, .keyword, .resume-btn, .nav-toggle, .scroll-hint, .modal-close, .modal-content'
   ).forEach(el => {
     el.addEventListener('mouseenter', () => cursorDot.classList.add('hover'));
     el.addEventListener('mouseleave', () => cursorDot.classList.remove('hover'));
@@ -40,9 +40,9 @@
     target: 0,
     velocity: 0,
     paused: false,
-    wheelMultiplier: 0.2,
+    wheelMultiplier: 0.24,
     friction: 0.78,
-    ease: 0.038,
+    ease: 0.0456,
     minVelocity: 0.12,
     maxScroll: 0,
 
@@ -178,35 +178,76 @@
 
   /* ---- Photojournalism Cylinder ---- */
   const cylinder = document.getElementById('cylinder');
-  const cylinderScene = document.getElementById('cylinderScene');
+  const photoBlock = document.getElementById('photo');
+  const photoScrollTrack = document.getElementById('photoScrollTrack');
+  const photoSticky = document.querySelector('.photo-sticky');
   const cards = cylinder.querySelectorAll('.cylinder-card');
   const cardCount = cards.length;
   const angleStep = 360 / cardCount;
-  const radius = window.innerWidth <= 768 ? 220 : 280;
+  const SPIN_SPEED = 0.75; /* 25% slower */
 
-  cards.forEach((card, i) => {
-    const angle = angleStep * i;
-    card.style.transform = `rotateY(${angle}deg) translateZ(${radius}px)`;
-  });
+  function getCylinderRadius() {
+    return window.innerWidth <= 768 ? 275.88 : 351.12;
+  }
 
-  let cylinderRotation = 0;
-  let sceneActive = false;
+  function layoutCylinderCards() {
+    const radius = getCylinderRadius();
+    cards.forEach((card, i) => {
+      const angle = angleStep * i;
+      card.style.transform = `rotateY(${angle}deg) translateZ(${radius}px)`;
+    });
+  }
 
-  const sceneObserver = new IntersectionObserver(
-    entries => {
-      sceneActive = entries[0].isIntersecting;
-    },
-    { threshold: 0.3 }
-  );
-  sceneObserver.observe(cylinderScene);
+  layoutCylinderCards();
 
-  window.addEventListener('scroll', () => {
-    if (!sceneActive) return;
-    const rect = cylinderScene.getBoundingClientRect();
-    const progress = 1 - rect.top / window.innerHeight;
-    cylinderRotation = progress * 360;
-    cylinder.style.transform = `rotateY(${cylinderRotation}deg)`;
-  }, { passive: true });
+  function getStickyTop() {
+    return photoSticky ? parseFloat(getComputedStyle(photoSticky).top) : 72;
+  }
+
+  /* Track height sized so a full 360° turn spans the scroll range at reduced speed */
+  function layoutPhotoTrack() {
+    if (!photoScrollTrack) return;
+    const vh = window.innerHeight;
+    const stickyTop = getStickyTop();
+    const rotationScroll = (vh - stickyTop) / SPIN_SPEED;
+    photoScrollTrack.style.height = `${vh + rotationScroll}px`;
+  }
+
+  function updateCardHitTargets(rotationDeg) {
+    cards.forEach((card, i) => {
+      const worldAngle = (angleStep * i + rotationDeg) % 360;
+      const facing = Math.cos((worldAngle * Math.PI) / 180);
+      const isFront = facing > 0;
+
+      card.classList.toggle('cylinder-card--front', isFront);
+      card.setAttribute('aria-hidden', isFront ? 'false' : 'true');
+    });
+  }
+
+  function updateCylinder() {
+    if (!photoBlock) return;
+
+    const vh = window.innerHeight;
+    const rect = photoBlock.getBoundingClientRect();
+    const blockHeight = photoBlock.offsetHeight;
+
+    /* Spin 0→360° as the full section scrolls through the viewport, not only while sticky */
+    const progress = Math.max(0, Math.min(1, (vh - rect.top) / (blockHeight + vh)));
+    const rotationDeg = progress * 360;
+    cylinder.style.transform = `rotateY(${rotationDeg}deg)`;
+    updateCardHitTargets(rotationDeg);
+  }
+
+  function onPhotoLayoutChange() {
+    layoutPhotoTrack();
+    layoutCylinderCards();
+    updateCylinder();
+  }
+
+  layoutPhotoTrack();
+  window.addEventListener('scroll', updateCylinder, { passive: true });
+  window.addEventListener('resize', onPhotoLayoutChange);
+  updateCylinder();
 
   /* ---- Photo Modal ---- */
   const modal = document.getElementById('photoModal');
@@ -217,12 +258,14 @@
 
   cards.forEach(card => {
     card.addEventListener('click', () => {
+      if (!card.classList.contains('cylinder-card--front')) return;
+
       const info = card.querySelector('.card-info');
       modalTitle.textContent = info.querySelector('h4').textContent;
       modalText.textContent = info.querySelector('p').textContent;
       modal.classList.add('active');
       modal.setAttribute('aria-hidden', 'false');
-      document.body.style.overflow = 'hidden';
+      document.body.classList.add('modal-open');
       smoothScroll.pause();
     });
   });
@@ -230,7 +273,7 @@
   function closeModal() {
     modal.classList.remove('active');
     modal.setAttribute('aria-hidden', 'true');
-    document.body.style.overflow = '';
+    document.body.classList.remove('modal-open');
     smoothScroll.resume();
   }
 
@@ -241,53 +284,210 @@
   });
 
   /* ---- Rowing Shell Animation ---- */
+  const rowingScrollTrack = document.getElementById('rowingScrollTrack');
+  const rowingSticky = document.querySelector('.rowing-sticky');
   const rowingScene = document.getElementById('rowingScene');
   const rowingShell = document.getElementById('rowingShell');
+  const shellTrack = document.getElementById('shellTrack');
+  const waterPath = document.getElementById('waterPath');
   const rowingInfos = rowingScene.querySelectorAll('.rowing-info');
-  let rowingActive = false;
+  const WATER_VIEWBOX = { width: 1200, height: 80 };
+  const CARD_GAP_SCALE = 0.9215;
+  const ROWING_LENGTH_SCALE = 1.5;
 
-  const rowingObserver = new IntersectionObserver(
-    entries => {
-      rowingActive = entries[0].isIntersecting;
-    },
-    { threshold: 0.2 }
-  );
-  rowingObserver.observe(rowingScene);
+  function getRowingLinearProgress() {
+    const rect = rowingScrollTrack.getBoundingClientRect();
+    const trackHeight = rowingScrollTrack.offsetHeight;
+    const vh = window.innerHeight;
+    return Math.max(0, Math.min(1, (vh - rect.top) / (trackHeight + vh)));
+  }
 
-  function updateRowing() {
-    if (!rowingActive) return;
+  /* Piecewise vertical path: decelerate → constant → accelerate */
+  function getContentViewportY(t) {
+    const yStart = 0.92;
+    const yBottomThird = 2 / 3;
+    const yTwoThirds = 1 / 3;
+    const yEnd = -0.08;
 
-    const rect = rowingScene.getBoundingClientRect();
-    const sceneHeight = rowingScene.offsetHeight;
-    const scrollProgress = Math.max(0, Math.min(1,
-      (window.innerHeight - rect.top) / (window.innerHeight + sceneHeight * 0.6)
-    ));
+    if (t <= 0.33) {
+      const p = t / 0.33;
+      const eased = 1 - Math.pow(1 - p, 2.5);
+      return yStart + (yBottomThird - yStart) * eased;
+    }
+    if (t <= 0.66) {
+      const p = (t - 0.33) / 0.33;
+      return yBottomThird + (yTwoThirds - yBottomThird) * p;
+    }
+    const p = (t - 0.66) / 0.34;
+    const eased = p * p;
+    return yTwoThirds + (yEnd - yTwoThirds) * eased;
+  }
 
+  function updateContentPosition(linearT) {
+    if (!rowingSticky || !rowingScrollTrack) return;
+
+    const vh = window.innerHeight;
+    const targetCenterY = getContentViewportY(linearT) * vh;
+    const trackRect = rowingScrollTrack.getBoundingClientRect();
+    const naturalCenterY = trackRect.top + rowingSticky.offsetHeight / 2;
+
+    rowingSticky.style.transform = `translateY(${targetCenterY - naturalCenterY}px)`;
+  }
+
+  function getRowingScrollLength() {
+    const base = window.innerWidth <= 768 ? 667 : 556;
+    return base * ROWING_LENGTH_SCALE;
+  }
+
+  function layoutRowingTrack() {
+    if (!rowingScrollTrack) return;
+    const vh = window.innerHeight;
+    rowingScrollTrack.style.height = `${vh + getRowingScrollLength()}px`;
+  }
+
+  function getShellMetrics() {
     const isMobile = window.innerWidth <= 768;
-    const maxTravel = isMobile ? sceneHeight - 60 : window.innerWidth - 140;
-    const shellPos = scrollProgress * maxTravel;
+    return {
+      isMobile,
+      width: isMobile ? 80 : 120,
+      height: isMobile ? 16 : 24,
+      centerX: isMobile ? 40 : 60,
+      centerY: isMobile ? 8 : 12
+    };
+  }
+
+  function getPathPointAtXRatio(ratio) {
+    if (!waterPath) return { x: 0, y: WATER_VIEWBOX.height / 2 };
+
+    const targetX = ratio * WATER_VIEWBOX.width;
+    const total = waterPath.getTotalLength();
+    let bestPoint = { x: 0, y: WATER_VIEWBOX.height / 2 };
+    let bestDist = Infinity;
+
+    for (let i = 0; i <= 300; i++) {
+      const pt = waterPath.getPointAtLength((i / 300) * total);
+      const dist = Math.abs(pt.x - targetX);
+      if (dist < bestDist) {
+        bestDist = dist;
+        bestPoint = pt;
+      }
+    }
+
+    return bestPoint;
+  }
+
+  function getPathPointAtLengthRatio(ratio) {
+    if (!waterPath) return { x: 0, y: WATER_VIEWBOX.height / 2 };
+    return waterPath.getPointAtLength(ratio * waterPath.getTotalLength());
+  }
+
+  function mapPathPointToTrack(pt) {
+    const trackWidth = shellTrack.offsetWidth;
+    const trackHeight = shellTrack.offsetHeight;
+
+    return {
+      x: (pt.x / WATER_VIEWBOX.width) * trackWidth,
+      y: (pt.y / WATER_VIEWBOX.height) * trackHeight
+    };
+  }
+
+  function positionShellOnPath(shellLeft) {
+    const { centerX, centerY } = getShellMetrics();
+    const trackWidth = shellTrack.offsetWidth;
+    const ratio = Math.max(0, Math.min(1, (shellLeft + centerX) / trackWidth));
+    const pt = mapPathPointToTrack(getPathPointAtXRatio(ratio));
+
+    rowingShell.style.left = `${shellLeft}px`;
+    rowingShell.style.top = `${pt.y - centerY}px`;
+    rowingShell.style.transform = 'none';
+  }
+
+  function positionShellOnPathByProgress(progress) {
+    const { centerX, centerY } = getShellMetrics();
+    const pt = mapPathPointToTrack(getPathPointAtLengthRatio(progress));
+
+    rowingShell.style.left = `${pt.x - centerX}px`;
+    rowingShell.style.top = `${pt.y - centerY}px`;
+    rowingShell.style.transform = 'none';
+  }
+
+  function layoutRowingInfos() {
+    if (!shellTrack || !rowingInfos.length) return;
+
+    const { isMobile } = getShellMetrics();
+    const count = rowingInfos.length;
 
     if (isMobile) {
-      rowingShell.style.left = '10px';
-      rowingShell.style.top = `${shellPos}px`;
-      rowingShell.style.transform = 'none';
+      const topStart = 12;
+      const topEnd = 76;
+      const range = topEnd - topStart;
+      const step = count > 1 ? (range / (count - 1)) * CARD_GAP_SCALE : 0;
+      const offset = topStart + (range - step * (count - 1)) / 2;
+      rowingInfos.forEach((info, i) => {
+        info.style.left = '5%';
+        info.style.top = `${offset + step * i}%`;
+      });
+      return;
+    }
+
+    const trackW = shellTrack.offsetWidth;
+    const cardW = Math.min(180, Math.max(150, trackW * 0.16));
+    document.documentElement.style.setProperty('--info-card-width', `${cardW}px`);
+
+    const edgePad = cardW / 2 + 32;
+    const span = Math.max(0, trackW - edgePad * 2);
+    const step = count > 1 ? (span / (count - 1)) * CARD_GAP_SCALE : 0;
+    const start = edgePad + (span - step * (count - 1)) / 2;
+
+    rowingInfos.forEach((info, i) => {
+      info.style.left = `${start + step * i}px`;
+      info.style.top = '50%';
+    });
+  }
+
+  function updateRowing() {
+    if (!shellTrack || !rowingScrollTrack) return;
+
+    const rect = rowingScrollTrack.getBoundingClientRect();
+    const vh = window.innerHeight;
+    if (rect.bottom <= 0 || rect.top >= vh) return;
+
+    const linearProgress = getRowingLinearProgress();
+    updateContentPosition(linearProgress);
+
+    const { isMobile } = getShellMetrics();
+
+    if (isMobile) {
+      positionShellOnPathByProgress(linearProgress);
     } else {
-      rowingShell.style.top = '50%';
-      rowingShell.style.left = `${shellPos}px`;
-      rowingShell.style.transform = 'translateY(-50%)';
+      const trackW = shellTrack.offsetWidth;
+      const cardW = Math.min(180, Math.max(150, trackW * 0.16));
+      const { centerX } = getShellMetrics();
+      const edgePad = cardW / 2 + 32;
+      const span = Math.max(0, trackW - edgePad * 2);
+      const step = rowingInfos.length > 1 ? (span / (rowingInfos.length - 1)) * CARD_GAP_SCALE : 0;
+      const start = edgePad + (span - step * (rowingInfos.length - 1)) / 2;
+      const maxTravel = step * (rowingInfos.length - 1);
+      positionShellOnPath(start - centerX + linearProgress * maxTravel);
     }
 
     const stepCount = rowingInfos.length;
     rowingInfos.forEach((info, i) => {
       const stepStart = i / stepCount;
-      const stepEnd = (i + 1) / stepCount;
-      const inStep = scrollProgress >= stepStart - 0.05 && scrollProgress <= stepEnd + 0.1;
-      info.classList.toggle('visible', inStep);
+      info.classList.toggle('visible', linearProgress >= stepStart - 0.05);
     });
   }
 
+  function onRowingLayoutChange() {
+    layoutRowingTrack();
+    layoutRowingInfos();
+    updateRowing();
+  }
+
+  layoutRowingTrack();
+  layoutRowingInfos();
   window.addEventListener('scroll', updateRowing, { passive: true });
-  window.addEventListener('resize', updateRowing);
+  window.addEventListener('resize', onRowingLayoutChange);
   updateRowing();
 
   /* ---- Keyword hover ripple ---- */
