@@ -415,48 +415,54 @@ a, button, .cylinder-card, .keyword, .resume-btn, .nav-toggle, .scroll-hint {
   transition: opacity var(--transition);
 }
 
-.env-img--portrait {
-  width: clamp(140px, 18vw, 200px);
-  aspect-ratio: 3 / 5;
+.env-fig > .env-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
-.env-img--square {
-  width: clamp(200px, 28vw, 280px);
-  aspect-ratio: 1;
+.env-img--sat-10 {
+  filter: saturate(0.1);
 }
 
-.env-img--landscape {
-  width: clamp(220px, 32vw, 360px);
-  aspect-ratio: 4 / 3;
-}
-
-.env-img--square-sm {
-  width: clamp(160px, 22vw, 220px);
-  aspect-ratio: 1;
+.env-fig > .env-img.env-img--contain {
+  object-fit: contain;
 }
 
 .env-fig--portrait {
-  top: 200px;
-  left: 0;
+  top: 780px;
+  left: 6%;
   z-index: 1;
+  width: clamp(140px, 18vw, 200px);
+  aspect-ratio: 3 / 5;
+  overflow: hidden;
 }
 
 .env-fig--square {
   top: 410px;
   left: calc(34% + 30px);
   z-index: 2;
+  width: clamp(200px, 28vw, 280px);
+  aspect-ratio: 1;
+  overflow: hidden;
 }
 
 .env-fig--landscape {
   top: 40px;
   right: 0;
   z-index: 1;
+  width: clamp(220px, 32vw, 360px);
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
 }
 
 .env-fig--square-sm {
-  top: 780px;
-  left: 6%;
+  top: 200px;
+  left: 0;
   z-index: 2;
+  width: clamp(160px, 22vw, 220px);
+  aspect-ratio: 1;
+  overflow: hidden;
 }
 
 .env-tag {
@@ -470,8 +476,9 @@ a, button, .cylinder-card, .keyword, .resume-btn, .nav-toggle, .scroll-hint {
 }
 
 .env-tag--1 {
-  top: 32px;
-  left: clamp(160px, 22vw, 240px);
+  top: 900px;
+  left: 302px;
+  max-width: 220px;
 }
 
 .env-tag--2 {
@@ -488,9 +495,8 @@ a, button, .cylinder-card, .keyword, .resume-btn, .nav-toggle, .scroll-hint {
 }
 
 .env-tag--4 {
-  top: 900px;
-  left: 302px;
-  max-width: 220px;
+  top: 32px;
+  left: clamp(160px, 22vw, 240px);
 }
 
 .env-statement {
@@ -570,6 +576,8 @@ a, button, .cylinder-card, .keyword, .resume-btn, .nav-toggle, .scroll-hint {
   backface-visibility: hidden;
   transition: transform var(--transition), box-shadow var(--transition);
   transform-origin: center center;
+  object-fit: cover;
+  display: block;
 }
 
 .cylinder-card--front:hover .cylinder-img {
@@ -933,9 +941,14 @@ a, button, .cylinder-card, .keyword, .resume-btn, .nav-toggle, .scroll-hint {
     left: calc(28% + 30px);
   }
 
-  .env-fig--square-sm {
+  .env-fig--portrait {
     top: 700px;
     left: 4%;
+  }
+
+  .env-fig--square-sm {
+    top: 200px;
+    left: 0;
   }
 
   .env-statement {
@@ -945,12 +958,12 @@ a, button, .cylinder-card, .keyword, .resume-btn, .nav-toggle, .scroll-hint {
   }
 
   .env-tag--1 {
-    left: clamp(130px, 20vw, 200px);
+    top: 800px;
+    left: calc(18% + 62px);
   }
 
   .env-tag--4 {
-    top: 800px;
-    left: calc(18% + 62px);
+    left: clamp(130px, 20vw, 200px);
   }
 
   .photo-sticky {
@@ -1034,8 +1047,13 @@ a, button, .cylinder-card, .keyword, .resume-btn, .nav-toggle, .scroll-hint {
     font-size: 1.1rem;
   }
 
-  .env-fig--square-sm {
+  .env-fig--portrait {
     top: 620px;
+  }
+
+  .env-fig--square-sm {
+    top: 200px;
+    left: 0;
   }
 
   .env-tag--3 {
@@ -1043,7 +1061,7 @@ a, button, .cylinder-card, .keyword, .resume-btn, .nav-toggle, .scroll-hint {
     right: 2%;
   }
 
-  .env-tag--4 {
+  .env-tag--1 {
     top: 700px;
     left: calc(10% + 62px);
   }

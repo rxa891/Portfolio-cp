@@ -181,7 +181,6 @@
 
   /* ---- Photojournalism Cylinder ---- */
   const cylinder = document.getElementById('cylinder');
-  const photoBlock = document.getElementById('photo');
   const photoScrollTrack = document.getElementById('photoScrollTrack');
   const photoSticky = document.querySelector('.photo-sticky');
   const cards = cylinder.querySelectorAll('.cylinder-card');
@@ -228,14 +227,17 @@
   }
 
   function updateCylinder() {
-    if (!photoBlock) return;
+    if (!photoScrollTrack) return;
 
+    const rect = photoScrollTrack.getBoundingClientRect();
+    const trackHeight = photoScrollTrack.offsetHeight;
     const vh = window.innerHeight;
-    const rect = photoBlock.getBoundingClientRect();
-    const blockHeight = photoBlock.offsetHeight;
+    const scrollRange = trackHeight - vh;
 
-    /* Spin 0→360° as the full section scrolls through the viewport, not only while sticky */
-    const progress = Math.max(0, Math.min(1, (vh - rect.top) / (blockHeight + vh)));
+    if (scrollRange <= 0) return;
+
+    /* 0° at sticky lock (first photo), 360° after scrolling through the track */
+    const progress = Math.max(0, Math.min(1, -rect.top / scrollRange));
     const rotationDeg = progress * 360;
     cylinder.style.transform = `rotateY(${rotationDeg}deg)`;
     updateCardHitTargets(rotationDeg);
