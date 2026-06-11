@@ -29,7 +29,7 @@
   animateCursor();
 
   document.querySelectorAll(
-    'a, button, .cylinder-card, .keyword, .resume-btn, .nav-toggle, .scroll-hint, .modal-close, .modal-content, .rowing-shell'
+    'a, button, .cylinder-card, .cylinder-slider, .keyword, .resume-btn, .nav-toggle, .scroll-hint, .modal-close, .modal-content, .rowing-shell'
   ).forEach(el => {
     el.addEventListener('mouseenter', () => cursorDot.classList.add('hover'));
     el.addEventListener('mouseleave', () => cursorDot.classList.remove('hover'));
@@ -181,15 +181,13 @@
 
   /* ---- Photojournalism Cylinder ---- */
   const cylinder = document.getElementById('cylinder');
-  const photoScrollTrack = document.getElementById('photoScrollTrack');
-  const photoSticky = document.querySelector('.photo-sticky');
+  const cylinderSlider = document.getElementById('cylinderSlider');
   const cards = cylinder.querySelectorAll('.cylinder-card');
   const cardCount = cards.length;
   const angleStep = 360 / cardCount;
-  const SPIN_SPEED = 0.75; /* 25% slower */
 
   function getCylinderRadius() {
-    return window.innerWidth <= 768 ? 275.88 : 351.12;
+    return window.innerWidth <= 768 ? 330.88 : 406.12;
   }
 
   function layoutCylinderCards() {
@@ -198,21 +196,6 @@
       const angle = angleStep * i;
       card.style.transform = `rotateY(${angle}deg) translateZ(${radius}px)`;
     });
-  }
-
-  layoutCylinderCards();
-
-  function getStickyTop() {
-    return photoSticky ? parseFloat(getComputedStyle(photoSticky).top) : 72;
-  }
-
-  /* Track height sized so a full 360° turn spans the scroll range at reduced speed */
-  function layoutPhotoTrack() {
-    if (!photoScrollTrack) return;
-    const vh = window.innerHeight;
-    const stickyTop = getStickyTop();
-    const rotationScroll = (vh - stickyTop) / SPIN_SPEED;
-    photoScrollTrack.style.height = `${vh + rotationScroll}px`;
   }
 
   function updateCardHitTargets(rotationDeg) {
@@ -226,33 +209,46 @@
     });
   }
 
-  function updateCylinder() {
-    if (!photoScrollTrack) return;
-
-    const rect = photoScrollTrack.getBoundingClientRect();
-    const trackHeight = photoScrollTrack.offsetHeight;
-    const vh = window.innerHeight;
-    const scrollRange = trackHeight - vh;
-
-    if (scrollRange <= 0) return;
-
-    /* 0° at sticky lock (first photo), 360° after scrolling through the track */
-    const progress = Math.max(0, Math.min(1, -rect.top / scrollRange));
-    const rotationDeg = progress * 360;
+  function setCylinderRotation(rotationDeg) {
     cylinder.style.transform = `rotateY(${rotationDeg}deg)`;
     updateCardHitTargets(rotationDeg);
   }
 
-  function onPhotoLayoutChange() {
-    layoutPhotoTrack();
-    layoutCylinderCards();
-    updateCylinder();
+  layoutCylinderCards();
+
+  let isDraggingSlider = false;
+
+  if (cylinderSlider) {
+    cylinderSlider.addEventListener('input', () => {
+      setCylinderRotation(Number(cylinderSlider.value));
+    });
+
+    function startSliderDrag(e) {
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+
+      isDraggingSlider = true;
+      cursorSuppressed = true;
+      cursorDot.classList.add('hidden');
+      cursorDot.classList.remove('hover');
+      cylinderSlider.classList.add('is-dragging');
+    }
+
+    function endSliderDrag() {
+      if (!isDraggingSlider) return;
+
+      isDraggingSlider = false;
+      cursorSuppressed = false;
+      cylinderSlider.classList.remove('is-dragging');
+      cursorDot.classList.remove('hidden');
+    }
+
+    cylinderSlider.addEventListener('pointerdown', startSliderDrag);
+    window.addEventListener('pointerup', endSliderDrag);
+    window.addEventListener('pointercancel', endSliderDrag);
   }
 
-  layoutPhotoTrack();
-  window.addEventListener('scroll', updateCylinder, { passive: true });
-  window.addEventListener('resize', onPhotoLayoutChange);
-  updateCylinder();
+  window.addEventListener('resize', layoutCylinderCards);
+  setCylinderRotation(cylinderSlider ? Number(cylinderSlider.value) : 0);
 
   /* ---- Photo Modal ---- */
   const modal = document.getElementById('photoModal');
@@ -296,7 +292,6 @@
   const rowingInfos = rowingScene.querySelectorAll('.rowing-info');
   const WATER_VIEWBOX = { width: 1200, height: 80 };
   const CARD_GAP_SCALE = 0.9215;
-  const SHELL_OVERSHOOT = 28;
   const CARD_REVEAL_LEAD = 0.4;
   let shellProgress = 0;
   let isDraggingShell = false;
@@ -312,26 +307,6 @@
     };
   }
 
-  function getPathPointAtXRatio(ratio) {
-    if (!waterPath) return { x: 0, y: WATER_VIEWBOX.height / 2 };
-
-    const targetX = ratio * WATER_VIEWBOX.width;
-    const total = waterPath.getTotalLength();
-    let bestPoint = { x: 0, y: WATER_VIEWBOX.height / 2 };
-    let bestDist = Infinity;
-
-    for (let i = 0; i <= 300; i++) {
-      const pt = waterPath.getPointAtLength((i / 300) * total);
-      const dist = Math.abs(pt.x - targetX);
-      if (dist < bestDist) {
-        bestDist = dist;
-        bestPoint = pt;
-      }
-    }
-
-    return bestPoint;
-  }
-
   function getPathPointAtLengthRatio(ratio) {
     if (!waterPath) return { x: 0, y: WATER_VIEWBOX.height / 2 };
     return waterPath.getPointAtLength(ratio * waterPath.getTotalLength());
@@ -345,17 +320,6 @@
       x: (pt.x / WATER_VIEWBOX.width) * trackWidth,
       y: (pt.y / WATER_VIEWBOX.height) * trackHeight
     };
-  }
-
-  function positionShellOnPath(shellLeft) {
-    const { centerX, centerY } = getShellMetrics();
-    const trackWidth = shellTrack.offsetWidth;
-    const ratio = Math.max(0, Math.min(1, (shellLeft + centerX) / trackWidth));
-    const pt = mapPathPointToTrack(getPathPointAtXRatio(ratio));
-
-    rowingShell.style.left = `${shellLeft}px`;
-    rowingShell.style.top = `${pt.y - centerY}px`;
-    rowingShell.style.transform = 'none';
   }
 
   function positionShellOnPathByProgress(progress) {
@@ -401,25 +365,6 @@
     });
   }
 
-  function getShellTravelBounds() {
-    const { isMobile, centerX } = getShellMetrics();
-    if (isMobile) {
-      return { isMobile: true, maxTravel: 1.15 };
-    }
-
-    const trackW = shellTrack.offsetWidth;
-    const cardW = Math.min(180, Math.max(150, trackW * 0.16));
-    const edgePad = cardW / 2 + 32;
-    const span = Math.max(0, trackW - edgePad * 2);
-    const step = rowingInfos.length > 1 ? (span / (rowingInfos.length - 1)) * CARD_GAP_SCALE : 0;
-    const start = edgePad + (span - step * (rowingInfos.length - 1)) / 2;
-    const cardSpanTravel = step * (rowingInfos.length - 1);
-    const overshoot = cardW * 0.5 + SHELL_OVERSHOOT;
-    const maxTravel = cardSpanTravel + overshoot + 30;
-
-    return { isMobile: false, start: start - centerX, maxTravel };
-  }
-
   function getCardStepPx() {
     const { isMobile } = getShellMetrics();
     const count = rowingInfos.length;
@@ -460,31 +405,31 @@
     if (!shellTrack) return;
 
     shellProgress = Math.max(0, Math.min(1, progress));
-    const { isMobile } = getShellMetrics();
-
-    if (isMobile) {
-      positionShellOnPathByProgress(Math.min(1, shellProgress * 1.15));
-    } else {
-      const { start, maxTravel } = getShellTravelBounds();
-      positionShellOnPath(start + shellProgress * maxTravel);
-    }
-
+    positionShellOnPathByProgress(shellProgress);
     updateInfoCardsFromProgress();
     rowingShell.setAttribute('aria-valuenow', String(Math.round(shellProgress * 100)));
   }
 
   function progressFromPointer(clientX, clientY) {
-    const { isMobile, centerX } = getShellMetrics();
-
-    if (isMobile) {
-      const sceneRect = rowingScene.getBoundingClientRect();
-      return (clientY - sceneRect.top) / sceneRect.height;
-    }
+    if (!waterPath || !shellTrack) return shellProgress;
 
     const trackRect = shellTrack.getBoundingClientRect();
-    const { start, maxTravel } = getShellTravelBounds();
-    const shellLeft = clientX - trackRect.left - centerX;
-    return maxTravel > 0 ? (shellLeft - start) / maxTravel : 0;
+    const px = clientX - trackRect.left;
+    const py = clientY - trackRect.top;
+    let bestProgress = 0;
+    let bestDist = Infinity;
+
+    for (let i = 0; i <= 200; i++) {
+      const t = i / 200;
+      const pt = mapPathPointToTrack(getPathPointAtLengthRatio(t));
+      const dist = Math.hypot(pt.x - px, pt.y - py);
+      if (dist < bestDist) {
+        bestDist = dist;
+        bestProgress = t;
+      }
+    }
+
+    return bestProgress;
   }
 
   function onShellPointerDown(e) {

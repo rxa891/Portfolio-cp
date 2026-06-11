@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Minkyo Kim — Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Arimo:ital,wght@0,300;0,400;0,500;0,600;0,700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -75,42 +78,45 @@
       <article class="activity-block env-block" id="env">
         <h3 class="activity-title">K-Environmentalism</h3>
         <div class="env-collage">
-          <figure class="env-fig env-fig--portrait">
-            <img src="images/getbol.jpg" alt="Getbol — Oriental storks flying over wetland" class="env-img env-img--portrait env-img--sat-10" loading="lazy">
-          </figure>
-
-          <p class="env-tag env-tag--1">Getbol — Korea's mudflat as a model for carbon neutrality</p>
-
-          <figure class="env-fig env-fig--square">
-            <img src="images/mudflat.jpg" alt="Getbol — Korean tidal flat at low tide with wooden stakes and distant mountains" class="env-img env-img--square" loading="lazy">
-          </figure>
-
-          <p class="env-tag env-tag--2">Byeotjip — straw stacks and sustainable regeneration</p>
-
-          <figure class="env-fig env-fig--landscape">
-            <img src="images/pet-net.jpg" alt="Pet-Net — tidal mudflat with wooden stakes at low tide" class="env-img env-img--landscape" loading="lazy">
-          </figure>
-
-          <p class="env-tag env-tag--3">Pet-Net — collecting trash on the water while rowing</p>
-
           <p class="env-statement">K-Environmentalism Magazine — preserving culture for the future</p>
 
-          <figure class="env-fig env-fig--square-sm">
-            <img src="images/byeotjip.jpg" alt="Byeotjip — straw stacks in a harvested rice field" class="env-img env-img--square-sm" loading="lazy">
-          </figure>
+          <div class="env-piece env-piece--right">
+            <p class="env-caption">Pet-Net — collecting trash on the water while rowing</p>
+            <figure class="env-fig env-fig--landscape">
+              <img src="images/pet-net.jpg" alt="Pet-Net — tidal mudflat with wooden stakes at low tide" class="env-img" loading="lazy">
+            </figure>
+          </div>
 
-          <p class="env-tag env-tag--4">Row for Pure, Cut through Sweat — environmental campaign on the water</p>
+          <div class="env-piece env-piece--left">
+            <figure class="env-fig env-fig--square-sm">
+              <img src="images/byeotjip.jpg" alt="Byeotjip — straw stacks in a harvested rice field" class="env-img" loading="lazy">
+            </figure>
+            <p class="env-caption">Row for Pure, Cut through Sweat — environmental campaign on the water</p>
+          </div>
+
+          <div class="env-piece env-piece--right">
+            <p class="env-caption">Byeotjip — straw stacks and sustainable regeneration</p>
+            <figure class="env-fig env-fig--square">
+              <img src="images/mudflat.jpg" alt="Getbol — Korean tidal flat at low tide with wooden stakes and distant mountains" class="env-img" loading="lazy">
+            </figure>
+          </div>
+
+          <div class="env-piece env-piece--left env-piece--portrait">
+            <figure class="env-fig env-fig--portrait">
+              <img src="images/getbol.jpg" alt="Getbol — Oriental storks flying over wetland" class="env-img env-img--sat-10" loading="lazy">
+            </figure>
+            <p class="env-caption">Getbol — Korea's mudflat as a model for carbon neutrality</p>
+          </div>
         </div>
       </article>
 
       <!-- Photojournalism -->
       <article class="activity-block photo-block" id="photo">
         <h3 class="activity-title">Photojournalism</h3>
-        <p class="activity-sub">Scroll to spin the gallery · Click an image for details</p>
-        <div class="photo-scroll-track" id="photoScrollTrack">
-          <div class="photo-sticky">
-            <div class="cylinder-scene" id="cylinderScene">
-              <div class="cylinder" id="cylinder">
+        <p class="activity-sub">Use the slider to spin the gallery · Click an image for details</p>
+        <div class="photo-gallery">
+          <div class="cylinder-scene" id="cylinderScene">
+            <div class="cylinder" id="cylinder">
             <div class="cylinder-card" data-index="0">
               <img src="images/impeachment.jpg" alt="Light Against Darkness — National Assembly at night during impeachment protests" class="cylinder-img" loading="lazy">
               <div class="card-info">
@@ -153,8 +159,10 @@
                 <p>Lightsticks of hope against anachronistic darkness — reflecting Korea's democratic journey.</p>
               </div>
             </div>
-              </div>
             </div>
+          </div>
+          <div class="cylinder-controls">
+            <input type="range" id="cylinderSlider" class="cylinder-slider" min="0" max="360" value="0" step="1" aria-label="Rotate photo gallery">
           </div>
         </div>
       </article>

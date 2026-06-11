@@ -1,7 +1,7 @@
 /* =============================================
    Minkyo Kim Portfolio
    Colors: #0080FE (Azure), #FFFEFA (Off-white)
-   Font: Helvetica Neue
+   Font: Arimo (body) · Helvetica (titles)
    ============================================= */
 
 *, *::before, *::after {
@@ -24,6 +24,8 @@
   --spacing-xl: 8rem;
   --radius: 12px;
   --transition: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  --font-body: "Arimo", sans-serif;
+  --font-title: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 html {
@@ -32,12 +34,24 @@ html {
 }
 
 body {
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: var(--font-body);
   background: var(--cream);
   color: var(--text);
   line-height: 1.7;
   overflow-x: hidden;
   cursor: none;
+}
+
+h1, h2, h3, h4,
+.nav-logo,
+.hero-name,
+.section-title,
+.activity-title,
+.env-statement,
+.modal-content h4,
+.info-card h4,
+.card-info h4 {
+  font-family: var(--font-title);
 }
 
 body.modal-open {
@@ -49,7 +63,7 @@ body.modal-open .modal * {
   cursor: none;
 }
 
-a, button, .cylinder-card, .keyword, .resume-btn, .nav-toggle, .scroll-hint {
+a, button, .cylinder-card, .cylinder-slider, .keyword, .resume-btn, .nav-toggle, .scroll-hint {
   cursor: none;
 }
 
@@ -393,124 +407,128 @@ a, button, .cylinder-card, .keyword, .resume-btn, .nav-toggle, .scroll-hint {
   letter-spacing: 0.02em;
 }
 
-/* K-Environmentalism — editorial collage with vertical overlap */
-.env-block {
-  overflow: visible;
+/* K-Environmentalism — editorial collage, edge-bleed images */
+.env-collage {
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  position: relative;
+  min-height: clamp(880px, 95vw, 1040px);
+  margin-top: var(--spacing-md);
+  padding-bottom: var(--spacing-md);
 }
 
-.env-collage {
+.env-statement {
+  position: absolute;
+  top: 38%;
+  left: 34%;
+  right: max(var(--spacing-sm), calc((100vw - 1100px) / 2 + var(--spacing-sm)));
+  z-index: 6;
+  font-size: clamp(1.35rem, 2.8vw, 2rem);
+  font-weight: 400;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  max-width: 32rem;
+  pointer-events: none;
+}
+
+.env-piece {
+  display: flex;
+  align-items: flex-end;
+  gap: clamp(1.25rem, 4vw, 3rem);
   position: relative;
-  min-height: 1080px;
-  margin-top: var(--spacing-md);
+}
+
+.env-piece + .env-piece {
+  margin-top: clamp(-3.5rem, -6vw, -2rem);
+}
+
+.env-piece--right {
+  justify-content: flex-end;
+  padding-left: var(--spacing-sm);
+}
+
+.env-piece--left {
+  justify-content: flex-start;
+  padding-right: var(--spacing-sm);
+}
+
+.env-piece:nth-child(2) { z-index: 1; }
+.env-piece:nth-child(3) { z-index: 3; }
+.env-piece:nth-child(4) { z-index: 4; }
+.env-piece:nth-child(5) { z-index: 5; }
+
+.env-piece--left:nth-child(3) {
+  margin-top: clamp(-5rem, -8vw, -3rem);
+}
+
+.env-piece--portrait {
+  align-items: flex-start;
+  margin-top: clamp(-4rem, -7vw, -2.5rem);
 }
 
 .env-fig {
-  position: absolute;
   margin: 0;
+  flex-shrink: 0;
+  overflow: hidden;
 }
 
 .env-img {
   display: block;
-  border-radius: 0;
-  transition: opacity var(--transition);
-}
-
-.env-fig > .env-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  border-radius: 0;
+  transition: opacity var(--transition);
 }
 
 .env-img--sat-10 {
   filter: saturate(0.1);
 }
 
-.env-fig > .env-img.env-img--contain {
-  object-fit: contain;
-}
-
-.env-fig--portrait {
-  top: 780px;
-  left: 6%;
-  z-index: 1;
-  width: clamp(140px, 18vw, 200px);
-  aspect-ratio: 3 / 5;
-  overflow: hidden;
+.env-fig--landscape {
+  width: clamp(300px, 54vw, 480px);
+  aspect-ratio: 4 / 3;
 }
 
 .env-fig--square {
-  top: 410px;
-  left: calc(34% + 30px);
-  z-index: 2;
-  width: clamp(200px, 28vw, 280px);
+  width: clamp(260px, 40vw, 340px);
   aspect-ratio: 1;
-  overflow: hidden;
-}
-
-.env-fig--landscape {
-  top: 40px;
-  right: 0;
-  z-index: 1;
-  width: clamp(220px, 32vw, 360px);
-  aspect-ratio: 4 / 3;
-  overflow: hidden;
 }
 
 .env-fig--square-sm {
-  top: 200px;
-  left: 0;
-  z-index: 2;
-  width: clamp(160px, 22vw, 220px);
+  width: clamp(240px, 38vw, 320px);
   aspect-ratio: 1;
-  overflow: hidden;
 }
 
-.env-tag {
-  position: absolute;
-  font-size: 0.82rem;
+.env-fig--portrait {
+  width: clamp(170px, 24vw, 220px);
+  aspect-ratio: 3 / 5;
+}
+
+.env-caption {
+  flex: 0 1 15rem;
+  font-size: 0.88rem;
   color: var(--text-muted);
-  line-height: 1.55;
+  line-height: 1.6;
   letter-spacing: 0.01em;
-  max-width: 200px;
-  z-index: 4;
+  padding-bottom: 1.25rem;
 }
 
-.env-tag--1 {
-  top: 900px;
-  left: 302px;
-  max-width: 220px;
-}
-
-.env-tag--2 {
-  top: 300px;
-  left: 4%;
-  max-width: 160px;
-}
-
-.env-tag--3 {
-  top: 200px;
-  right: 6%;
-  max-width: 180px;
+.env-piece--right .env-caption {
   text-align: right;
+  align-self: center;
 }
 
-.env-tag--4 {
-  top: 32px;
-  left: clamp(160px, 22vw, 240px);
+.env-piece--left .env-caption {
+  align-self: center;
 }
 
-.env-statement {
-  position: absolute;
-  top: 740px;
-  right: 0;
-  left: calc(38% + 150px);
-  z-index: 5;
-  font-size: clamp(1.35rem, 2.8vw, 2rem);
-  font-weight: 400;
-  line-height: 1.35;
-  letter-spacing: -0.01em;
-  color: var(--text);
-  max-width: 520px;
+.env-piece--portrait .env-caption {
+  align-self: flex-start;
+  padding-top: 0.25rem;
+  padding-bottom: 0;
+  max-width: 14rem;
 }
 
 .env-fig:hover .env-img {
@@ -518,20 +536,56 @@ a, button, .cylinder-card, .keyword, .resume-btn, .nav-toggle, .scroll-hint {
 }
 
 /* Photojournalism Cylinder */
-.photo-scroll-track {
-  position: relative;
+.photo-gallery {
   margin: 0 -1rem;
-  /* height set in JS: exactly one viewport of scroll for a full 360° rotation */
 }
 
-.photo-sticky {
-  position: sticky;
-  top: 72px;
-  height: calc(100vh - 72px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 2;
+.cylinder-controls {
+  max-width: 420px;
+  margin: var(--spacing-sm) auto 0;
+  padding: 0 var(--spacing-sm);
+}
+
+.cylinder-slider {
+  width: 100%;
+  height: 6px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: var(--azure-light);
+  border-radius: 3px;
+  outline: none;
+  cursor: none;
+}
+
+.cylinder-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--azure);
+  border: 2px solid var(--cream);
+  box-shadow: 0 2px 8px rgba(0, 128, 254, 0.35);
+  transition: width 0.2s ease, height 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cylinder-slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--azure);
+  border: 2px solid var(--cream);
+  box-shadow: 0 2px 8px rgba(0, 128, 254, 0.35);
+  transition: width 0.2s ease, height 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cylinder-slider.is-dragging::-webkit-slider-thumb {
+  width: 23px;
+  height: 23px;
+}
+
+.cylinder-slider.is-dragging::-moz-range-thumb {
+  width: 23px;
+  height: 23px;
 }
 
 .cylinder-scene {
@@ -571,7 +625,7 @@ a, button, .cylinder-card, .keyword, .resume-btn, .nav-toggle, .scroll-hint {
 .cylinder-card .cylinder-img {
   width: 100%;
   height: 100%;
-  border-radius: var(--radius);
+  border-radius: 5px;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
   backface-visibility: hidden;
   transition: transform var(--transition), box-shadow var(--transition);
@@ -933,42 +987,46 @@ a, button, .cylinder-card, .keyword, .resume-btn, .nav-toggle, .scroll-hint {
   }
 
   .env-collage {
-    min-height: 850px;
-  }
-
-  .env-fig--square {
-    top: 390px;
-    left: calc(28% + 30px);
-  }
-
-  .env-fig--portrait {
-    top: 700px;
-    left: 4%;
-  }
-
-  .env-fig--square-sm {
-    top: 200px;
-    left: 0;
+    min-height: auto;
+    padding-bottom: var(--spacing-sm);
   }
 
   .env-statement {
-    top: 680px;
-    left: calc(32% + 150px);
-    font-size: 1.25rem;
+    position: static;
+    margin: 0 var(--spacing-sm) var(--spacing-sm);
+    max-width: none;
+    pointer-events: auto;
   }
 
-  .env-tag--1 {
-    top: 800px;
-    left: calc(18% + 62px);
+  .env-piece + .env-piece,
+  .env-piece--left:nth-of-type(3),
+  .env-piece--portrait {
+    margin-top: var(--spacing-md);
   }
 
-  .env-tag--4 {
-    left: clamp(130px, 20vw, 200px);
+  .env-piece--right,
+  .env-piece--left {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
+    padding-left: 0;
+    padding-right: 0;
   }
 
-  .photo-sticky {
-    top: 64px;
-    height: calc(100vh - 64px);
+  .env-piece--right {
+    align-items: flex-end;
+  }
+
+  .env-piece--right .env-caption {
+    text-align: right;
+    align-self: flex-end;
+    padding-bottom: 0;
+  }
+
+  .env-piece--left .env-caption,
+  .env-piece--portrait .env-caption {
+    padding-bottom: 0;
+    max-width: none;
   }
 
   .cylinder-scene {
@@ -1027,43 +1085,13 @@ a, button, .cylinder-card, .keyword, .resume-btn, .nav-toggle, .scroll-hint {
     padding: 0.4rem 0.9rem;
   }
 
-  .env-collage {
-    min-height: 720px;
-  }
-
   .env-fig--landscape {
-    top: 24px;
-    right: -4%;
+    width: clamp(260px, 78vw, 360px);
   }
 
-  .env-fig--square {
-    top: 370px;
-    left: calc(22% + 30px);
-  }
-
-  .env-statement {
-    top: 620px;
-    left: calc(24% + 150px);
-    font-size: 1.1rem;
-  }
-
-  .env-fig--portrait {
-    top: 620px;
-  }
-
+  .env-fig--square,
   .env-fig--square-sm {
-    top: 200px;
-    left: 0;
-  }
-
-  .env-tag--3 {
-    top: 160px;
-    right: 2%;
-  }
-
-  .env-tag--1 {
-    top: 700px;
-    left: calc(10% + 62px);
+    width: clamp(220px, 72vw, 300px);
   }
 }
 
